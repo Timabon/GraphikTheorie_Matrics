@@ -1,0 +1,241 @@
+Index: src/main/java/org/example/HUB.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/HUB.java b/src/main/java/org/example/HUB.java
+--- a/src/main/java/org/example/HUB.java	
++++ b/src/main/java/org/example/HUB.java	(date 1684429625145)
+@@ -1,0 +1,37 @@
++package org.example;
++
++import java.io.BufferedReader;
++import java.io.FileReader;
++import java.io.IOException;
++import java.util.ArrayList;
++
++public abstract class HUB {
++
++    protected int len;
++    protected int[][] endResult;
++    protected int[][] resultTmp;
++    protected int[][] tmp;
++    protected int [][] matrix = new int[][] {{0, 1, 1, 1, 0},{1, 0, 0, 1, 1},{1, 0, 0, 1, 0},{1, 1, 1, 0, 0},{0, 1, 0, 0, 0}};
++
++
++
++    public HUB (){
++        this.len = matrix[0].length;
++        this.resultTmp = matrix;
++        this.endResult = new int[len][len];
++
++        int[][] csvMatrix = new int[len][len];
++        try (BufferedReader br = new BufferedReader(new FileReader("Matrix.csv"))) {
++            String line = br.readLine();
++            while (line != null) {
++                String[] strArray = line.split(";");
++                line = br.readLine();
++                for (int i = 0; i < len; i++) {
++
++                }
++            }
++        } catch (IOException e) {
++            System.out.println("Buffred reader error: " + e);
++        }
++    }
++}
+Index: src/main/java/org/example/Main.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/Main.java b/src/main/java/org/example/Main.java
+--- a/src/main/java/org/example/Main.java	
++++ b/src/main/java/org/example/Main.java	(date 1683822360000)
+@@ -1,0 +1,10 @@
++package org.example;
++
++public class Main {
++    public static void main(String[] args) {
++        Matrix mtx = new Matrix();
++
++        mtx.print(mtx.distanzMatrixv1());
++    }
++
++}
+Index: src/main/java/org/example/Matrix.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/Matrix.java b/src/main/java/org/example/Matrix.java
+--- a/src/main/java/org/example/Matrix.java	
++++ b/src/main/java/org/example/Matrix.java	(date 1684356095028)
+@@ -1,0 +1,79 @@
++package org.example;
++
++import java.util.Arrays;
++
++public class Matrix extends HUB {
++
++
++    int k = 2;
++
++    public int[][] berechnenMatrix(int gradZahl) {  //Wir brauchen es nur fur PotenzMatrix
++        if (gradZahl > 1) {
++            tmp = new int[len][len]; // RESET TMP because of recursion
++            for (int i = 0; i < len; i++) {
++                for (int j = 0; j < len; j++) {
++                    for (int l = 0; l < len; l++) {
++                        tmp[i][j] += matrix[i][l] * resultTmp[l][j]; // Matrix MUL
++                    }
++                }
++            }
++            resultTmp = tmp;
++            return berechnenMatrix(gradZahl - 1); // recursion
++        } else {
++            endResult = resultTmp; // buffer arr -> EndResult
++            resultTmp = matrix; // buffer arr reseted
++            return endResult;
++        }
++    }
++
++    public int[][] distanzMatrixv1() {
++        int[][] distanzMat = new int[len][len];
++        for (int i = 0; i < len; i++) {
++            for (int j = 0; j < len; j++) {
++                distanzMat[i][j] = matrix[i][j];
++                if (distanzMat[i][j] == 0 && i != j) {
++                    distanzMat[i][j] = 9;
++                }
++            }
++        }
++        int h = 0;
++        while (h < len) { // len is length of all points in Graph for example " G = A B C D E " is len = 5
++            berechnenMatrix(k);
++            for (int p = 0; p < len; p++) {
++                for (int l = 0; l < len; l++) {
++                    if (distanzMat[p][l] == 9 && endResult[p][l] > 0) {
++                        distanzMat[p][l] = k;
++                    }
++                }
++            }
++            k++;
++            h++;
++        }
++        //todo break situation
++        return distanzMat;
++    }
++/*
++
++    public int[][] berechnDistanz () {
++        k++;
++        int[][] endResDistanz = distanzMatrixv1();
++        int[][] matrixMul = berechnenMatrix(k);
++
++        for (int i = 0; i < len; i++) {
++            for (int j = 0; j < len; j++) {
++                if (i == j) {
++                    endResDistanz[i][j] = 0;
++                } else if (matrixMul[i][j] == 0 && endResDistanz[i][j] == k-1) {
++                    endResDistanz[i][j] = k;
++                }
++            }
++        }
++        return endResDistanz;
++    }
++*/
++
++    public void print(int[][] mat) {
++        System.out.println(Arrays.deepToString(mat).replace("], ", "]\n").replace("[[", "[").replace("]]", "]"));
++        /*.replace("], ", "]\n").replace("[[", "[").replace("]]", "]"))*/
++    }
++}
+Index: pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/pom.xml b/pom.xml
+--- a/pom.xml	
++++ b/pom.xml	(date 1677932110676)
+@@ -1,0 +1,61 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project xmlns="http://maven.apache.org/POM/4.0.0"
++         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++    <modelVersion>4.0.0</modelVersion>
++
++    <groupId>org.example</groupId>
++    <artifactId>POS_Project</artifactId>
++    <version>1.0-SNAPSHOT</version>
++    <dependencies>
++        <dependency>
++            <groupId>org.junit.jupiter</groupId>
++            <artifactId>junit-jupiter</artifactId>
++            <version>RELEASE</version>
++            <scope>test</scope>
++        </dependency>
++        <dependency>
++            <groupId>junit</groupId>
++            <artifactId>junit</artifactId>
++            <version>RELEASE</version>
++            <scope>test</scope>
++        </dependency>
++        <dependency>
++            <groupId>org.junit.jupiter</groupId>
++            <artifactId>junit-jupiter</artifactId>
++            <version>RELEASE</version>
++            <scope>test</scope>
++        </dependency>
++        <dependency>
++            <groupId>org.junit.jupiter</groupId>
++            <artifactId>junit-jupiter</artifactId>
++            <version>RELEASE</version>
++            <scope>test</scope>
++        </dependency>
++        <dependency>
++            <groupId>junit</groupId>
++            <artifactId>junit</artifactId>
++            <version>RELEASE</version>
++            <scope>test</scope>
++        </dependency>
++        <dependency>
++            <groupId>org.junit.jupiter</groupId>
++            <artifactId>junit-jupiter</artifactId>
++            <version>RELEASE</version>
++            <scope>test</scope>
++        </dependency>
++        <dependency>
++            <groupId>org.junit.jupiter</groupId>
++            <artifactId>junit-jupiter</artifactId>
++            <version>RELEASE</version>
++            <scope>test</scope>
++        </dependency>
++    </dependencies>
++
++    <properties>
++        <maven.compiler.source>19</maven.compiler.source>
++        <maven.compiler.target>19</maven.compiler.target>
++        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
++    </properties>
++
++</project>
+\ No newline at end of file
+Index: Matrix.csv
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Matrix.csv b/Matrix.csv
+--- a/Matrix.csv	
++++ b/Matrix.csv	(date 1684357263773)
+@@ -1,0 +1,7 @@
++0;1;1;1;0;0;0
++1;0;0;1;0;1;0
++1;0;0;1;0;0;0
++1;1;1;0;1;0;0
++0;0;0;1;0;1;1
++0;1;0;0;1;0;0
++0;0;0;0;1;0;0
+\ No newline at end of file
